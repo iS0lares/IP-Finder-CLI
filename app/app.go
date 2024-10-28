@@ -10,8 +10,8 @@ import (
 
 func Gerar() *cli.App {
 	app := cli.NewApp()
-	app.Name = "Ip Finder"
-	app.Usage = "Aplicação pra busca de ip e nomes de servidores na internet"
+	app.Name = "Ip Finder CLI"
+	app.Usage = "App to find ips and servers name"
 
 	flags := []cli.Flag{
 		cli.StringFlag{
@@ -23,23 +23,23 @@ func Gerar() *cli.App {
 	app.Commands =[]cli.Command{
 		{
 			Name: "ip",
-			Usage: "Busca ips de endereços na internet",
+			Usage: "search ip address on internet",
 			Flags: flags,
-			Action: buscarIps,
+			Action: searchIp,
 		},
 
 		{
-			Name: "servidores",
-			Usage: "Busca o nome do servidor na internet",
+			Name: "server",
+			Usage: "Search name of servers on internet",
 			Flags: flags,
-			Action: buscarServidor,
+			Action: searchServers,
 		},
 	}
 
 	return app
 }
 
-func buscarIps(c *cli.Context) {
+func searchIp(c *cli.Context) {
 	host := c.String("host")
 
 	ips, erro := net.LookupIP(host)
@@ -53,15 +53,15 @@ func buscarIps(c *cli.Context) {
 
 }
 
-func buscarServidor(c *cli.Context) {
+func searchServers(c *cli.Context) {
 	host := c.String("host")
 	
-	servidores, erro := net.LookupNS(host)
+	servers, erro := net.LookupNS(host)
 	if erro != nil {
 		log.Fatal(erro)
 	}
 
-	for _, servidor := range servidores {
-		fmt.Println(servidor.Host)
+	for _, server := range servers {
+		fmt.Println(server.Host)
 	}
 }
