@@ -8,7 +8,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-func Gerar() *cli.App {
+func Generate() *cli.App {
 	app := cli.NewApp()
 	app.Name = "Ip Finder CLI"
 	app.Usage = "App to find ips and servers name"
@@ -16,7 +16,7 @@ func Gerar() *cli.App {
 	flags := []cli.Flag{
 		cli.StringFlag{
 			Name: "host",
-			Value: "google.com",
+			Value: getFirstNonLoopbackIP(),
 		},
 	}
 
@@ -64,4 +64,17 @@ func searchServers(c *cli.Context) {
 	for _, server := range servers {
 		fmt.Println(server.Host)
 	}
+}
+
+func getFirstNonLoopbackIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return ""
+	}
+	for _, addr := range addrs {
+		if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() && ipNet.IP.To4() != nil {
+			return ipNet.IP.String()
+		}
+	}
+	return ""
 }
