@@ -2,8 +2,10 @@ package app
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"net/http"
 
 	"github.com/urfave/cli"
 )
@@ -16,7 +18,7 @@ func Generate() *cli.App {
 	flags := []cli.Flag{
 		cli.StringFlag{
 			Name: "host",
-			Value: getFirstNonLoopbackIP(),
+			Value: "",
 		},
 	}
 
@@ -42,9 +44,16 @@ func Generate() *cli.App {
 func searchIp(c *cli.Context) {
 	host := c.String("host")
 
-	ips, erro := net.LookupIP(host)
-	if erro != nil {
-		log.Fatal(erro)
+
+	if host == "" {
+		ip := getPublicAddress()
+		fmt.Println(ip)
+
+		return
+	}
+	ips, err := net.LookupIP(host)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	for _, ip := range ips {
@@ -56,9 +65,9 @@ func searchIp(c *cli.Context) {
 func searchServers(c *cli.Context) {
 	host := c.String("host")
 	
-	servers, erro := net.LookupNS(host)
-	if erro != nil {
-		log.Fatal(erro)
+	servers, err := net.LookupNS(host)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	for _, server := range servers {
@@ -77,4 +86,21 @@ func getFirstNonLoopbackIP() string {
 		}
 	}
 	return ""
+}
+
+func getPublicAddress() string {
+	resp, err := http.Get("https://ifconfig.me")
+
+	if err != nil {
+		fmt.Printf("Error: %v", err.Error())
+	}
+
+	data, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		fmt.Printf("Error: %v", err.Error())
+	}
+
+	return string(data)
+
 }
